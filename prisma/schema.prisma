@@ -22,6 +22,8 @@ model User {
   created_at DateTime @default(now())
   tasks_created Task[] @relation("TasksCreated")
   tasks_assigned Task[] @relation("TasksAssigned")
+
+  @@map("users")
 }
 
 model Task {
@@ -35,10 +37,12 @@ model Task {
   updated_at DateTime @default(now())
   creator User @relation("TasksCreated", fields: [created_by], references: [id])
   assignee User @relation("TasksAssigned", fields: [assigned_to], references: [id])
+
+  @@map("tasks")
 }
 
 enum Role {
-  LEADER
+  LEAD
   TEAM
 }
 
