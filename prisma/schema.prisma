@@ -42,13 +42,13 @@ model Task {
 }
 
 enum Role {
-  LEAD
-  TEAM
+  LEAD @map("Lead")
+  TEAM @map("Team")
 }
 
 enum Status {
-  NOT_STARTED
-  ON_PROGRESS
-  DONE
-  REJECT
+  NOT_STARTED @map("Not Started")
+  ON_PROGRESS @map("On Progress")
+  DONE @map("Done")
+  REJECT @map("Reject")
 }
