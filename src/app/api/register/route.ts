@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import bcrypt from "bcrypt";
 
 import prisma from "@/lib/prisma";
 import { registrationSchema } from "@/lib/schema";
@@ -8,10 +9,12 @@ export async function POST(req: NextRequest) {
   const parsed = registrationSchema.safeParse(data);
 
   if (parsed.success) {
+    const payload = parsed.data;
+
     // Check user if exist
     const userExist = await prisma.user.findUnique({
       where: {
-        email: parsed.data.email,
+        email: payload.email,
       },
     });
 
@@ -23,9 +26,11 @@ export async function POST(req: NextRequest) {
     }
 
     try {
+      payload.password = await bcrypt.hash(payload.password, 10);
+
       // Add data to the database
       const user = await prisma.user.create({
-        data: parsed.data,
+        data: payload,
         select: {
           id: true,
           username: true,
@@ -41,13 +46,11 @@ export async function POST(req: NextRequest) {
       );
     } catch (error) {
       if (error instanceof Error) {
-        console.error("failed to create user", JSON.stringify(error));
         return NextResponse.json(
           { message: "Failed to create user" },
           { status: 400 }
         );
       }
-      console.error("Failed to create user", JSON.stringify(error));
       throw new Error("Failed to create user. Please try again!");
     }
   } else {
