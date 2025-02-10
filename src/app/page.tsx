@@ -2,9 +2,22 @@ import { redirect } from "next/navigation";
 
 import { ButtonLogout } from "@/components/button-logout";
 import { FormTodo } from "@/components/form-todo";
+import { Todos } from "@/components/todos";
 
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+
+async function getAssignedTodos(userId: number) {
+  try {
+    return prisma.task.findMany({
+      where: {
+        assigned_to: userId,
+      },
+    });
+  } catch (error) {
+    console.error(JSON.stringify(error));
+  }
+}
 
 export default async function Home() {
   const session = await getSession();
@@ -25,9 +38,11 @@ export default async function Home() {
     },
   });
 
+  const assignedTodo = await getAssignedTodos(session.userId as number);
+
   return (
     <section className="container mx-auto max-w-xl">
-      <div className="py-8">
+      <div className="py-8 space-y-8">
         <div className="flex justify-between items-start">
           <div className="space-y-2">
             <h1 className="font-bold uppercase text-3xl">Todo List</h1>
@@ -37,10 +52,13 @@ export default async function Home() {
           </div>
           <ButtonLogout />
         </div>
-        <div className="mt-8">
+        <div>
           {session?.role === "TEAM" ? null : (
             <FormTodo teams={teams} creator={currentUser?.id ?? 0} />
           )}
+        </div>
+        <div>
+          <Todos todos={assignedTodo ?? []} />
         </div>
       </div>
     </section>

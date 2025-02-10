@@ -39,3 +39,25 @@ export const todoSchema = z.object({
     message: "Assignee is required",
   }),
 });
+
+export const updateTodoSchema = z.object({
+  id: z.number().min(1, {
+    message: "Task id is required",
+  }),
+  title: z.string().trim().min(1, {
+    message: "Title is required",
+  }),
+  description: z.string().trim().optional(),
+  status: z.union([
+    z.literal("NOT_STARTED"),
+    z.literal("ON_PROGRESS"),
+    z.literal("DONE"),
+    z.literal("REJECT"),
+  ]),
+  created_by: z.number().min(1, {
+    message: "Creator is required",
+  }),
+  assigned_to: z.number().min(1, {
+    message: "Assignee is required",
+  }),
+});

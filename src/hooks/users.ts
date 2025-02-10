@@ -1,5 +1,6 @@
-import { fetcher } from "@/lib/utils";
 import useSWR from "swr";
+
+import { fetcher } from "@/lib/utils";
 
 type User = {
   id: number;
