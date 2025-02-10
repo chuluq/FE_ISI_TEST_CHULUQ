@@ -1,4 +1,5 @@
 import { ButtonLogout } from "@/components/button-logout";
+import { FormTodo } from "@/components/form-todo";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 
@@ -9,7 +10,12 @@ export default async function Home() {
       id: session?.userId as number,
     },
   });
-  // const users = await prisma.user.findMany();
+
+  const teams = await prisma.user.findMany({
+    where: {
+      role: "TEAM",
+    },
+  });
 
   return (
     <section className="container mx-auto max-w-xl">
@@ -24,21 +30,8 @@ export default async function Home() {
           <ButtonLogout />
         </div>
         <div className="mt-8">
-          {!session || session?.role === "TEAM" ? null : (
-            <form action="" className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Add new task"
-                className="border p-2 w-full rounded"
-                disabled={!session || session?.role === "TEAM"}
-              />
-              <button
-                disabled={!session || session?.role === "TEAM"}
-                className="bg-blue-400 rounded px-4 py-2 font-semibold uppercase text-white"
-              >
-                Add
-              </button>
-            </form>
+          {session?.role === "TEAM" ? null : (
+            <FormTodo teams={teams} creator={currentUser?.id ?? 0} />
           )}
         </div>
       </div>
