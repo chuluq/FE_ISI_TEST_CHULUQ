@@ -16,3 +16,12 @@ export const registrationSchema = z.object({
 });
 
 export type UserSchema = z.infer<typeof registrationSchema>;
+
+export const loginSchema = z.object({
+  email: z.string().trim().email({
+    message: "Invalid email address",
+  }),
+  password: z.string().trim().min(1, {
+    message: "Password is required",
+  }),
+});

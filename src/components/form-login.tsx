@@ -3,16 +3,11 @@
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
 
-import { registrationSchema, UserSchema } from "@/lib/schema";
+import { loginSchema } from "@/lib/schema";
 
-export type FormState = {
-  message: string;
-  user?: Omit<UserSchema, "password">;
-  issues?: string[];
-};
-
-export const FormRegistration = () => {
+export const FormLogin = () => {
   const router = useRouter();
 
   const {
@@ -20,29 +15,25 @@ export const FormRegistration = () => {
     register,
     reset,
     formState: { errors },
-  } = useForm<UserSchema>({
-    resolver: zodResolver(registrationSchema),
+  } = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
       email: "",
       password: "",
-      role: "LEAD",
     },
   });
 
-  const onSubmit = async (values: UserSchema) => {
-    const response = await fetch("/api/register", {
+  const onSubmit = async (values: z.infer<typeof loginSchema>) => {
+    const response = await fetch("/api/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(values),
     });
-
     if (response.ok) {
-      router.push("/login");
+      router.push("/");
     }
-
     reset();
   };
 
@@ -50,22 +41,13 @@ export const FormRegistration = () => {
     <>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 w-full">
         <div className="grid gap-2">
-          <label htmlFor="username">Username</label>
-          <input
-            type="text"
-            id="username"
-            className="border"
-            {...register("username")}
-          />
-          {errors?.username && (
-            <p className="px-1 text-xs text-red-600">
-              {errors?.username.message}
-            </p>
-          )}
-        </div>
-        <div className="grid gap-2">
           <label htmlFor="email">Email</label>
-          <input type="email" className="border" {...register("email")} />
+          <input
+            type="email"
+            id="email"
+            className="border"
+            {...register("email")}
+          />
           {errors?.email && (
             <p className="px-1 text-xs text-red-600">{errors?.email.message}</p>
           )}
@@ -84,21 +66,11 @@ export const FormRegistration = () => {
             </p>
           )}
         </div>
-        <div className="grid gap-2">
-          <label htmlFor="role">Role</label>
-          <select id="role" className="p-2 rounded" {...register("role")}>
-            <option value="LEAD">Lead</option>
-            <option value="TEAM">Team</option>
-          </select>
-          {errors?.role && (
-            <p className="px-1 text-xs text-red-600">{errors?.role.message}</p>
-          )}
-        </div>
         <button
           type="submit"
           className="bg-blue-400 rounded text-white font-semibold px-2 py-1"
         >
-          Register
+          Login
         </button>
       </form>
     </>
