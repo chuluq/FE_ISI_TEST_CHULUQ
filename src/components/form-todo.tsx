@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -17,6 +18,8 @@ interface FormTodoProps {
 }
 
 export const FormTodo = ({ teams, creator }: FormTodoProps) => {
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof todoSchema>>({
     resolver: zodResolver(todoSchema),
     defaultValues: {
@@ -39,6 +42,7 @@ export const FormTodo = ({ teams, creator }: FormTodoProps) => {
       console.log(JSON.stringify(error));
     } finally {
       form.reset();
+      router.refresh();
     }
   };
 

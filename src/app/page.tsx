@@ -19,6 +19,18 @@ async function getAssignedTodos(userId: number) {
   }
 }
 
+async function getCreatedTodos(userId: number) {
+  try {
+    return prisma.task.findMany({
+      where: {
+        created_by: userId,
+      },
+    });
+  } catch (error) {
+    console.error(JSON.stringify(error));
+  }
+}
+
 export default async function Home() {
   const session = await getSession();
 
@@ -32,6 +44,10 @@ export default async function Home() {
     },
   });
 
+  if (!currentUser) {
+    redirect("/login");
+  }
+
   const teams = await prisma.user.findMany({
     where: {
       role: "TEAM",
@@ -39,6 +55,9 @@ export default async function Home() {
   });
 
   const assignedTodo = await getAssignedTodos(session.userId as number);
+  const createdTodo = await getCreatedTodos(session.userId as number);
+  const todos = currentUser?.role === "LEAD" ? createdTodo : assignedTodo;
+  const isTeam = currentUser?.role === "TEAM";
 
   return (
     <section className="container mx-auto max-w-xl">
@@ -58,7 +77,7 @@ export default async function Home() {
           )}
         </div>
         <div>
-          <Todos todos={assignedTodo ?? []} />
+          <Todos todos={todos ?? []} teams={teams} isTeam={isTeam} />
         </div>
       </div>
     </section>

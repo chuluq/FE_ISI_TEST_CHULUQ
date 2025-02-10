@@ -24,9 +24,16 @@ type Todo = {
 
 interface TodosProps {
   todos: Todo[];
+  teams: {
+    id: number;
+    username: string;
+    email: string;
+    role: string;
+  }[];
+  isTeam: boolean;
 }
 
-export const Todos = ({ todos }: TodosProps) => {
+export const Todos = ({ todos, teams, isTeam }: TodosProps) => {
   const router = useRouter();
 
   const [openModal, setOpenModal] = useState(false);
@@ -42,6 +49,7 @@ export const Todos = ({ todos }: TodosProps) => {
   } = useForm<z.infer<typeof updateTodoSchema>>({
     resolver: zodResolver(updateTodoSchema),
     defaultValues: {
+      title: "",
       description: "",
       status: "NOT_STARTED",
     },
@@ -82,49 +90,54 @@ export const Todos = ({ todos }: TodosProps) => {
   return (
     <>
       {loading && <p>Loading...</p>}
-      {!loading &&
-        todos.map((todo) => (
-          <div key={todo.id} className="flex items-start justify-between gap-4">
-            <div className="flex flex-col gap-2">
-              <h3 className="font-semibold text-xl">{todo.title}</h3>
-              <p>{todo.description}</p>
-            </div>
-            <div className="flex space-x-2">
-              <span
-                className={cn(
-                  "p-2 font-medium text-sm rounded",
-                  todo.status.includes("NOT_STARTED") && "bg-slate-300",
-                  todo.status.includes("ON_PROGRESS") && "bg-blue-300",
-                  todo.status.includes("DONE") && "bg-green-300",
-                  todo.status.includes("REJECT") && "bg-red-300"
-                )}
-              >
-                {todo.status}
-              </span>
-              <button
-                onClick={() => onEditTask(todo)}
-                disabled={loading}
-                className="bg-yellow-400 p-2 rounded"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="1em"
-                  height="1em"
-                  viewBox="0 0 24 24"
+      <div className="space-y-8">
+        {!loading &&
+          todos.map((todo) => (
+            <div
+              key={todo.id}
+              className="flex items-start justify-between gap-4"
+            >
+              <div className="flex flex-col gap-2">
+                <h3 className="font-semibold text-xl">{todo.title}</h3>
+                <p>{todo.description}</p>
+              </div>
+              <div className="flex space-x-2">
+                <span
+                  className={cn(
+                    "p-2 font-medium text-sm rounded",
+                    todo.status.includes("NOT_STARTED") && "bg-slate-300",
+                    todo.status.includes("ON_PROGRESS") && "bg-blue-300",
+                    todo.status.includes("DONE") && "bg-green-300",
+                    todo.status.includes("REJECT") && "bg-red-300"
+                  )}
                 >
-                  <path
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497zM15 5l4 4"
-                  ></path>
-                </svg>
-              </button>
+                  {todo.status}
+                </span>
+                <button
+                  onClick={() => onEditTask(todo)}
+                  disabled={loading}
+                  className="bg-yellow-400 p-2 rounded"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="1em"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497zM15 5l4 4"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+      </div>
       {/* Modal */}
       <div
         className={cn(
@@ -141,12 +154,21 @@ export const Todos = ({ todos }: TodosProps) => {
                 setOpenModal(false);
               }}
               disabled={loading}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-500 hover:text-gray-700 text-2xl"
             >
               &times;
             </button>
           </div>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid gap-2">
+              <label htmlFor="title">Title</label>
+              <textarea
+                id="title"
+                disabled={isTeam}
+                className="border p-2 rounded disabled:cursor-not-allowed"
+                {...register("title")}
+              />
+            </div>
             <div className="grid gap-2">
               <label htmlFor="description">Description</label>
               <textarea
@@ -179,6 +201,28 @@ export const Todos = ({ todos }: TodosProps) => {
               {errors?.status && (
                 <p className="px-1 text-xs text-red-600">
                   {errors?.status.message}
+                </p>
+              )}
+            </div>
+            <div className="grid gap-2">
+              <label htmlFor="member">Choose a member</label>
+              <select
+                value={watch("assigned_to")}
+                onChange={(e) =>
+                  setValue("assigned_to", parseInt(e.target.value))
+                }
+                disabled={isTeam}
+                className="flex-1 px-4 py-2 bg-slate-200 rounded disabled:cursor-not-allowed"
+              >
+                {teams.map((user) => (
+                  <option value={user.id} key={user.email}>
+                    {user.username}
+                  </option>
+                ))}
+              </select>
+              {errors?.assigned_to && (
+                <p className="px-1 text-xs text-red-600">
+                  {errors?.assigned_to.message}
                 </p>
               )}
             </div>
