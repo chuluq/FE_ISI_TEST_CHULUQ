@@ -1,13 +1,21 @@
+import { redirect } from "next/navigation";
+
 import { ButtonLogout } from "@/components/button-logout";
 import { FormTodo } from "@/components/form-todo";
+
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 
 export default async function Home() {
   const session = await getSession();
+
+  if (!session) {
+    redirect("/login");
+  }
+
   const currentUser = await prisma.user.findUnique({
     where: {
-      id: session?.userId as number,
+      id: session.userId as number,
     },
   });
 

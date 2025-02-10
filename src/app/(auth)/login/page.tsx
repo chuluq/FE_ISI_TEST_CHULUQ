@@ -1,8 +1,17 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { FormLogin } from "@/components/form-login";
 
-export default function Login() {
+import { getSession } from "@/lib/session";
+
+export default async function Login() {
+  const session = await getSession();
+
+  if (session) {
+    redirect("/");
+  }
+
   return (
     <section className="container mx-auto max-w-xl">
       <div className="py-8 space-y-2">
